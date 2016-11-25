@@ -1,17 +1,21 @@
-{% set version = "0.2.18" %}
+{% set base_url = os.environ.get("OPENBLAS_URL", "https://sourceforge.net/projects/openblas/files/") %}
+{% set version = "0.2.14" %}
+{% set url = "{}v{}/OpenBLAS-v{}-Win64-int32.zip".format(base_url, version, version) %}
 
 package:
   name: openblas
   version: {{ version }}
 
 source:
-  fn: openblas-{{ version }}.tar.gz
-  url: https://github.com/xianyi/OpenBLAS/archive/v{{ version }}.tar.gz
-  md5: 805e7f660877d588ea7e3792cda2ee65
+  fn: openblas-{{ version }}.tar.gz # [not win]
+  url: https://github.com/xianyi/OpenBLAS/archive/v{{ version }}.tar.gz # [not win]
+  md5: 805e7f660877d588ea7e3792cda2ee65 # [not win]
+  fn: OpenBLAS-v0.2.14-Win64-int32.zip # [win]
+  url: {{ url }} # [win]
+  sha1: a9ab57847636ab820ff13792f7419079e4d6f05d # [win]
 
 build:
   number: 4
-  skip: true  # [win]
   track_features:
     - vc9     # [win and py27]
     - vc10    # [win and py34]
@@ -20,18 +24,12 @@ build:
 requirements:
   build:
     - python           # [win]
-    - perl
+    - perl             # [not win]
     - gcc              # [unix]
 
   run:
-    - libgfortran
-
-test:
-  commands:
-    - test -f ${PREFIX}/lib/libopenblas.a                            # [unix]
-    - test -f ${PREFIX}/lib/libopenblas.so                           # [linux]
-    - test -f ${PREFIX}/lib/libopenblas.dylib                        # [osx]
-    - if not exist %PREFIX%\\Library\\lib\\libopenblas.lib exit 1    # [win]
+    - libgfortran      # [not win]
+    - openblas-mingw   # [win]
 
 about:
   home: http://www.openblas.net/
